@@ -6,16 +6,14 @@ from shop.models import Product
 class Cart:
     def __init__(self, request):
         """
-        Initialize the cart.
+        Initialize the shopping cart using the current request's session.
         """
-        # Store the current session to make it accessible in other methods
         self.session = request.session
-
-        # Get the current cart from the session using the custom session ID
+        # Attempt to retrieve the cart from the session
         cart = self.session.get(settings.CART_SESSION_ID)
 
-        # If no cart is present in the session, create an empty cart dictionary
         if not cart:
+            # If no cart exists, create an empty dictionary in the session
             cart = self.session[settings.CART_SESSION_ID] = {}
 
         self.cart = cart
@@ -24,52 +22,80 @@ class Cart:
         """
         Add a product to the cart or update its quantity.
         """
-        # Convert product ID to string because JSON only allows string keys
         product_id = str(product.id)
 
-        # If the product is not in the cart, initialize it with 0 quantity and its current price
+        # Initialize the product in the cart if it doesn't exist yet
         if product_id not in self.cart:
             self.cart[product_id] = {
                 'quantity': 0, 'price': str(product.price)}
 
-        # Update the quantity based on the override_quantity flag
+        # Update quantity based on the override flag
         if override_quantity:
             self.cart[product_id]['quantity'] = quantity
         else:
             self.cart[product_id]['quantity'] += quantity
 
-        # Save the cart to the session
         self.save()
 
     def save(self):
         """
-        Mark the session as modified to tell Django it needs to be saved.
+        Mark the session as modified to force Django to save the updated cart.
         """
-        # This tells Django that the session data has changed and must be updated in the database
         self.session.modified = True
 
     def remove(self, product):
         """
-        Remove a product from the cart.
+        Remove a specific product from the cart.
         """
         product_id = str(product.id)
         if product_id in self.cart:
-            # Delete the product key from the cart dictionary
             del self.cart[product_id]
-            # Save the updated cart
             self.save()
 
     def __iter__(self):
         """
-        Iterate over the items in the cart and get the products from the database.
+        Iterate over the items in the cart and fetch the related Product 
+        instances from the database to attach them to the cart items.
         """
-        # Get all product IDs from the cart keys
         product_ids = self.cart.keys()
 
-        # Fetch the actual Product instances from the database in a single query
+        # Fetch all products in the cart in a single, efficient database query
         products = Product.objects.filter(id__in=product_ids)
 
-        # Copy the current cart dictionary to avoid modifying the session directly during iteration
+        # Create a copy of the cart to avoid modifying the session directly
         cart = self.cart.copy()
 
-        # Attach the
+        # Attach the Product instance to each cart item
+        for product in products:
+            cart[str(product.id)]['product'] = product
+
+        # Calculate prices and yield each item
+        for item in cart.values():
+            item['price'] = Decimal(item['price'])
+            item['total_price'] = item['price'] * item['quantity']
+
+            # CRITICAL: 'yield' must be indented inside this loop to make
+            # the class a proper generator. Otherwise, it returns NoneType.
+            yield item
+
+    def __len__(self):
+        """
+        Return the total number of items in the cart (sum of quantities).
+        """
+        return sum(item['quantity'] for item in self.cart.values())
+
+    def get_total_price(self):
+        """
+        Calculate and return the total cost of all items in the cart.
+        """
+        return sum(
+            Decimal(item['price']) * item['quantity']
+            for item in self.cart.values()
+        )
+
+    def clear(self):
+        """
+        Completely remove the cart from the user's session.
+        """
+        del self.session[settings.CART_SESSION_ID]
+        self.save()
