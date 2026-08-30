@@ -29,7 +29,7 @@
             </td>
             <td>{{ product.name }}</td>
             <td>
-    <!-- Form to update the quantity of the item in the cart -->
+    <!-- Form to u<a href="#" class="button">Checkout</a>pdate the quantity of the item in the cart -->
     <form action="{% url 'cart:cart_add' product.id %}" method="post">
         {{ item.update_quantity_form.quantity }}
         {{ item.update_quantity_form.override }} <!-- Hidden field to override quantity -->
@@ -57,6 +57,9 @@
   </table>
   <p class="text-right">
     <a href="{% url 'shop:product_list' %}" class="button light">Continue shopping</a>
-    <a href="#" class="button">Checkout</a>
+   <!-- Link the Checkout button to the order creation page -->
+<a href="{% url 'orders:order_create' %}" class="button">
+  Checkout
+</a>
   </p>
 {% endblock %}
