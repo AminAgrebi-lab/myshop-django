@@ -3,6 +3,9 @@ from django.shortcuts import render
 from .forms import OrderCreateForm
 from .models import OrderItem
 
+# Import the asynchronous task
+from .tasks import order_created
+
 
 def order_create(request):
     """
@@ -30,7 +33,12 @@ def order_create(request):
             # 3. Empty the session cart after a successful order
             cart.clear()
 
-            # 4. Render the success (thank-you) page
+            # 4. Send the confirmation email asynchronously:
+            #    .delay() serializes the arguments, pushes the message to
+            #    RabbitMQ, and returns IMMEDIATELY without waiting for the email.
+            order_created.delay(order.id)
+
+            # 5. Render the success (thank-you) page
             return render(
                 request,
                 'orders/order/created.html',

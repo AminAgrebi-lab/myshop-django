@@ -134,3 +134,11 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 CART_SESSION_ID = 'cart'
+
+# Development email backend: print emails to the worker console
+# instead of sending them through a real SMTP server
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Use Redis as the Celery message broker
+# ✅ صحيح: لا توجد مسافات قبل الكلمة
+CELERY_BROKER_URL = 'redis://localhost:6380/0'
