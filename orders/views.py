@@ -1,27 +1,24 @@
 from cart.cart import Cart
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from .forms import OrderCreateForm
 from .models import OrderItem
-
 # Import the asynchronous task
 from .tasks import order_created
 
 
 def order_create(request):
     """
-    Handle the checkout process:
-    - GET request: display an empty order form.
-    - POST request: validate data, persist the order, and clear the cart.
+    Handle checkout: persist the order, queue the confirmation
+    email, then redirect the customer to the payment process.
     """
     cart = Cart(request)
-
     if request.method == 'POST':
         form = OrderCreateForm(request.POST)
         if form.is_valid():
             # 1. Save the customer details as a new Order record
             order = form.save()
 
-            # 2. Persist each cart item as an OrderItem in the database
+            # 2. Persist each cart item as an OrderItem
             for item in cart:
                 OrderItem.objects.create(
                     order=order,
@@ -30,25 +27,19 @@ def order_create(request):
                     quantity=item['quantity'],
                 )
 
-            # 3. Empty the session cart after a successful order
+            # 3. Empty the session cart
             cart.clear()
 
-            # 4. Send the confirmation email asynchronously:
-            #    .delay() serializes the arguments, pushes the message to
-            #    RabbitMQ, and returns IMMEDIATELY without waiting for the email.
+            # 4. Queue the async confirmation email
             order_created.delay(order.id)
 
-            # 5. Render the success (thank-you) page
-            return render(
-                request,
-                'orders/order/created.html',
-                {'order': order},
-            )
-    else:
-        # Instantiate an empty form for GET requests
-        form = OrderCreateForm()
+            # 5. Remember the order in the session for the payment app
+            request.session['order_id'] = order.id
 
-    # Fallback response for GET requests or invalid form submissions
+            # 6. Redirect to the Stripe payment process
+            return redirect('payment:process')
+    else:
+        form = OrderCreateForm()
     return render(
         request,
         'orders/order/create.html',

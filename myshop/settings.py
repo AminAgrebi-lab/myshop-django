@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'cart.apps.CartConfig',
     'orders.apps.OrdersConfig',
+    'payment.apps.PaymentConfig',
     'shop.apps.ShopConfig',
 ]
 
@@ -141,7 +142,6 @@ CART_SESSION_ID = 'cart'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Use Redis as the Celery message broker
-# ✅ صحيح: لا توجد مسافات قبل الكلمة
 CELERY_BROKER_URL = 'redis://localhost:6380/0'
 
 
