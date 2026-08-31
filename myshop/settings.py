@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+from decouple import config
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -142,3 +143,11 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # Use Redis as the Celery message broker
 # ✅ صحيح: لا توجد مسافات قبل الكلمة
 CELERY_BROKER_URL = 'redis://localhost:6380/0'
+
+
+# Stripe API settings loaded securely from the .env file
+STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY')
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
+
+# Pin the Stripe API version to ensure consistent behavior
+STRIPE_API_VERSION = '2024-04-10'
