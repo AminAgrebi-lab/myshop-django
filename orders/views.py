@@ -1,8 +1,9 @@
 from cart.cart import Cart
-from django.shortcuts import redirect, render
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import get_object_or_404, redirect, render
+
 from .forms import OrderCreateForm
-from .models import OrderItem
-# Import the asynchronous task
+from .models import Order, OrderItem
 from .tasks import order_created
 
 
@@ -15,10 +16,7 @@ def order_create(request):
     if request.method == 'POST':
         form = OrderCreateForm(request.POST)
         if form.is_valid():
-            # 1. Save the customer details as a new Order record
             order = form.save()
-
-            # 2. Persist each cart item as an OrderItem
             for item in cart:
                 OrderItem.objects.create(
                     order=order,
@@ -26,17 +24,11 @@ def order_create(request):
                     price=item['price'],
                     quantity=item['quantity'],
                 )
-
-            # 3. Empty the session cart
             cart.clear()
-
-            # 4. Queue the async confirmation email
+            # Queue the async confirmation email
             order_created.delay(order.id)
-
-            # 5. Remember the order in the session for the payment app
+            # Remember the order in the session for the payment app
             request.session['order_id'] = order.id
-
-            # 6. Redirect to the Stripe payment process
             return redirect('payment:process')
     else:
         form = OrderCreateForm()
@@ -44,4 +36,18 @@ def order_create(request):
         request,
         'orders/order/create.html',
         {'cart': cart, 'form': form},
+    )
+
+
+@staff_member_required
+def admin_order_detail(request, order_id):
+    """
+    Custom admin view displaying the full details of an order.
+    Only accessible to active staff users.
+    """
+    order = get_object_or_404(Order, id=order_id)
+    return render(
+        request,
+        'admin/orders/order/detail.html',
+        {'order': order},
     )
