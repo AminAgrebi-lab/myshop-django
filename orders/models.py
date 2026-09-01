@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -15,6 +16,8 @@ class Order(models.Model):
     updated = models.DateTimeField(auto_now=True)
     # Flag to differentiate between paid and unpaid orders later
     paid = models.BooleanField(default=False)
+    # New field to store the Stripe Payment Intent ID
+    stripe_id = models.CharField(max_length=250, blank=True)
 
     class Meta:
         # Sort orders by creation date, newest first
@@ -31,6 +34,20 @@ class Order(models.Model):
         Calculate the total cost by summing the cost of all related items.
         """
         return sum(item.get_cost() for item in self.items.all())
+
+    def get_stripe_url(self):
+        """
+        Return the Stripe dashboard URL for the related payment.
+        Handles both test and live environment URLs dynamically.
+        """
+        if not self.stripe_id:
+            return ''
+        # Check if we are in test mode by inspecting the secret key prefix
+        if '_test_' in settings.STRIPE_SECRET_KEY:
+            path = '/test/'
+        else:
+            path = '/'
+        return f'https://dashboard.stripe.com{path}payments/{self.stripe_id}'
 
 
 class OrderItem(models.Model):

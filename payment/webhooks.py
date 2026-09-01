@@ -43,6 +43,7 @@ def stripe_webhook(request):
 
             # Mark the order as paid and persist the change
             order.paid = True
+            order.stripe_id = session.payment_intent   # Store the Payment Intent ID
             order.save()
 
     return HttpResponse(status=200)
