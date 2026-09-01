@@ -13,6 +13,17 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from decouple import config
 from pathlib import Path
 
+import os
+import sys
+
+# Fix for WeasyPrint DLL loading on Windows (Python 3.8+)
+if sys.platform == 'win32':
+    gtk_path = r'D:\Program Files\GTK3-Runtime Win64\bin'
+    if os.path.exists(gtk_path):
+        os.add_dll_directory(gtk_path)
+
+# ... باقي الملف (BASE_DIR, SECRET_KEY, etc.) ...
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -161,3 +172,6 @@ STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY')
 STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
 STRIPE_API_VERSION = '2024-04-10'
 STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET')
+
+# Directory where collectstatic gathers all static files for production
+STATIC_ROOT = BASE_DIR / 'static'

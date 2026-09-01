@@ -34,6 +34,13 @@ def order_detail(obj):
 order_detail.short_description = 'Detail'
 
 
+def order_pdf(obj):
+    """Display a 'PDF' link to download the order invoice."""
+    url = reverse('orders:admin_order_pdf', args=[obj.id])
+    return mark_safe(f'<a href="{url}">PDF</a>')
+order_pdf.short_description = 'Invoice'
+
+
 def export_to_csv(modeladmin, request, queryset):
     """
     Generic admin action: export the selected objects to a CSV file.
@@ -70,7 +77,7 @@ class OrderAdmin(admin.ModelAdmin):
         'id', 'first_name', 'last_name', 'email',
         'address', 'postal_code', 'city', 'paid',
         order_payment, 'created', 'updated',
-        order_detail,   # <-- New 'View' link column
+        order_detail, order_pdf,
     ]
     list_filter = ['paid', 'created', 'updated']
     inlines = [OrderItemInline]
