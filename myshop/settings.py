@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from decouple import config
 from pathlib import Path
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,8 +27,8 @@ SECRET_KEY = 'django-insecure-t1-gkldh6=4t+1!-91w3$a@xbtd=nnp09^z*yyx0@6*08-%vyq
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+# Allow local development hosts plus any ngrok tunnel subdomain
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.app']
 
 # Application definition
 
@@ -151,3 +152,12 @@ STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
 
 # Pin the Stripe API version to ensure consistent behavior
 STRIPE_API_VERSION = '2024-04-10'
+
+
+
+
+# Stripe API settings loaded securely from the .env file
+STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY')
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
+STRIPE_API_VERSION = '2024-04-10'
+STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET')
