@@ -22,7 +22,6 @@ if sys.platform == 'win32':
     if os.path.exists(gtk_path):
         os.add_dll_directory(gtk_path)
 
-# ... باقي الملف (BASE_DIR, SECRET_KEY, etc.) ...
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -54,6 +53,7 @@ INSTALLED_APPS = [
     'orders.apps.OrdersConfig',
     'payment.apps.PaymentConfig',
     'shop.apps.ShopConfig',
+    'coupons.apps.CouponsConfig',
 ]
 
 MIDDLEWARE = [
