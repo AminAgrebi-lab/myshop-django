@@ -6,6 +6,9 @@ from orders.models import Order
 
 from .tasks import payment_completed
 
+from shop.models import Product
+from shop.recommender import Recommender
+
 
 @csrf_exempt
 def stripe_webhook(request):
@@ -39,6 +42,18 @@ def stripe_webhook(request):
             order.paid = True
             order.stripe_id = session.payment_intent
             order.save()
+            order.paid = True
+            order.stripe_id = session.payment_intent
+            order.save()
+
+            # Train the recommendation engine on this purchase
+            product_ids = order.items.values_list('product_id')
+            products = Product.objects.filter(id__in=product_ids)
+            recommender = Recommender()
+            recommender.products_bought(products)
+
+            # Queue the async invoice email via Celery
+            payment_completed.delay(order.id)
             # Queue the async invoice email via Celery
             payment_completed.delay(order.id)
 

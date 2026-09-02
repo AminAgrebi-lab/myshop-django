@@ -4,6 +4,8 @@ from .models import Category, Product
 # Import the form to handle adding products to the cart
 from cart.forms import CartAddProductForm
 
+from .recommender import Recommender
+
 
 def product_list(request, category_slug=None):
     category = None
@@ -26,21 +28,21 @@ def product_list(request, category_slug=None):
 
 
 def product_detail(request, id, slug):
-    """
-    View to display a single product and provide a form to add it to the cart.
-    """
     product = get_object_or_404(
         Product, id=id, slug=slug, available=True
     )
-
-    # Initialize the form to be used in the product detail template
     cart_product_form = CartAddProductForm()
-
+    # Fetch up to 4 products frequently bought with this one
+    recommender = Recommender()
+    recommended_products = recommender.suggest_products_for(
+        [product], 4
+    )
     return render(
         request,
         'shop/product/detail.html',
         {
             'product': product,
-            'cart_product_form': cart_product_form  # Pass the form to the template
-        }
+            'cart_product_form': cart_product_form,
+            'recommended_products': recommended_products,
+        },
     )

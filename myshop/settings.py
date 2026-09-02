@@ -175,3 +175,8 @@ STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET')
 
 # Directory where collectstatic gathers all static files for production
 STATIC_ROOT = BASE_DIR / 'static'
+
+# Redis connection for caching and the recommendation engine
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6380
+REDIS_DB = 1    # DB 0 for Celery broker, DB 1 for recommendations
