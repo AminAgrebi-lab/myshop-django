@@ -1,21 +1,12 @@
-import os
-import sys
-
-# Force Python to find GTK3 libraries before QEMU's incomplete copies
-if sys.platform == 'win32':
-    gtk_path = r'D:\Program Files\GTK3-Runtime Win64\bin'
-    if os.path.exists(gtk_path):
-        os.environ['PATH'] = gtk_path + os.pathsep + os.environ.get('PATH', '')
-
-# Now import everything else
 from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.staticfiles import finders
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
-import weasyprint  # This will now find the correct GTK3 libraries
+import weasyprint  # Safe now: settings.py registers the GTK3 DLL directory
 
 from cart.cart import Cart
+
 from .forms import OrderCreateForm
 from .models import Order, OrderItem
 from .tasks import order_created
@@ -23,14 +14,21 @@ from .tasks import order_created
 
 def order_create(request):
     """
-    Handle checkout: persist the order, queue the confirmation
-    email, then redirect the customer to the payment process.
+    Handle checkout: persist the order (with its coupon snapshot),
+    queue the confirmation email, then redirect to payment.
     """
     cart = Cart(request)
     if request.method == 'POST':
         form = OrderCreateForm(request.POST)
         if form.is_valid():
-            order = form.save()
+            # Build the order object WITHOUT saving to DB yet
+            order = form.save(commit=False)
+            # Attach the coupon and snapshot its discount, if applied
+            if cart.coupon:
+                order.coupon = cart.coupon
+                order.discount = cart.coupon.discount
+            # Now save the complete order
+            order.save()
             for item in cart:
                 OrderItem.objects.create(
                     order=order,
