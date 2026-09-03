@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'payment.apps.PaymentConfig',
     'shop.apps.ShopConfig',
     'coupons.apps.CouponsConfig',
+    'rosetta',
 ]
 
 MIDDLEWARE = [
@@ -126,11 +127,17 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+# LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es'
 
 LANGUAGES = [
     ('en', 'English'),
     ('es', 'Spanish'),
+]
+
+# Directories where Django looks for project-level translation files
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
 ]
 
 TIME_ZONE = 'UTC'

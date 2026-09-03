@@ -76,7 +76,7 @@
   </table>
   {% if recommended_products %}
   <div class="recommendations cart">
-    <h3>People who bought this also bought</h3>
+    <h3>{% translate "People who bought this also bought" %}</h3>
     {% for p in recommended_products %}
       <div class="item">
         <a href="{{ p.get_absolute_url }}">
