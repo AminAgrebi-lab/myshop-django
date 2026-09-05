@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-03 15:00+0100\n"
-"PO-Revision-Date: 2026-09-03 15:08+0000\n"
+"POT-Creation-Date: 2026-09-03 16:27+0100\n"
+"PO-Revision-Date: 2026-09-03 16:29+0000\n"
 "Last-Translator:   <admin@myshop.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -30,22 +30,33 @@ msgstr "Quienes compraron esto también compraron"
 msgid "Coupon"
 msgstr "Cupón"
 
-#: .\myshop\urls.py:13
+#: .\myshop\urls.py:12
 msgid "cart/"
 msgstr "carrito/"
 
-#: .\myshop\urls.py:14
+#: .\myshop\urls.py:13
 msgid "orders/"
 msgstr "pedidos/"
 
-#: .\myshop\urls.py:15
+#: .\myshop\urls.py:14
 msgid "payment/"
 msgstr "pago/"
 
-#: .\myshop\urls.py:16
-#| msgid "Coupon"
+#: .\myshop\urls.py:15
 msgid "coupons/"
 msgstr "cupones/"
+
+#: .\payment\urls.py:9
+msgid "process/"
+msgstr "procesar/"
+
+#: .\payment\urls.py:10
+msgid "completed/"
+msgstr "completado/"
+
+#: .\payment\urls.py:11
+msgid "canceled/"
+msgstr "cancelado/"
 
 #: .\shop\templates\shop\base.html:6 .\shop\templates\shop\base.html:11
 msgid "My shop"

@@ -7,7 +7,6 @@ from django.utils.translation import gettext_lazy as _
 
 from payment import webhooks
 
-# 1. الروابط التي تدعم اللغات وتحصل على بادئة (/en/, /es/)
 urlpatterns = i18n_patterns(
     path('admin/', admin.site.urls),
     path(_('cart/'), include('cart.urls', namespace='cart')),
@@ -18,7 +17,6 @@ urlpatterns = i18n_patterns(
     path('', include('shop.urls', namespace='shop')),
 )
 
-# 2. الروابط العالمية (بدون بادئة لغة) - مهمة جداً لـ Stripe!
 urlpatterns += [
     path('payment/webhook/', webhooks.stripe_webhook, name='stripe-webhook'),
 ]
